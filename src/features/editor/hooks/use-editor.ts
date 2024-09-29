@@ -10,7 +10,6 @@ const useEditor = () => {
     canvas,
     container,
   });
-
   const init = useCallback(
     ({
       initialCanvas,
@@ -49,14 +48,19 @@ const useEditor = () => {
       initialCanvas.centerObject(initialWorkspace);
       initialCanvas.clipPath = initialWorkspace;
 
+        const test = new fabric.Rect({
+        width: 200,
+        height: 200,
+        name: "clip",
+        fill: "black",
+        shadow: new fabric.Shadow({
+          color: "rgba(0,0,0,0.8)",
+          blur: 5,
+        }),
+      });
+
       setCanvas(initialCanvas);
       setContainer(initialContainer);
-
-      const test = new fabric.Rect({
-        height: 100,
-        width: 100,
-        fill: "black",
-      });
 
       initialCanvas.add(test);
       initialCanvas.centerObject(test);
