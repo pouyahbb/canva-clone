@@ -12,7 +12,7 @@ import { ShapeTool } from "./shapeTool";
 
 interface ShapeSidebarProps {
   activeTool: ActiveTool;
-  editor: Editor;
+  editor: Editor | undefined;
   onChangeActiveTool: (tool: ActiveTool) => void;
 }
 
@@ -44,6 +44,7 @@ export const ShapeSidebar = ({
             }}
             icon={FaCircle}
           />
+
           <ShapeTool
             onClick={() => {
               editor?.addSoftRectangle();
