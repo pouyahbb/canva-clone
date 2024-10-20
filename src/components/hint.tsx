@@ -10,11 +10,11 @@ export interface HintProps {
   children: React.ReactNode;
   side?: "top" | "bottom" | "left" | "right";
   align?: "start" | "center" | "end";
-  alignOffset?: number;
   sideOffset?: number;
+  alignOffset?: number;
 }
 
-const Hint = ({
+export const Hint = ({
   label,
   children,
   side,
@@ -27,11 +27,11 @@ const Hint = ({
       <Tooltip delayDuration={100}>
         <TooltipTrigger asChild>{children}</TooltipTrigger>
         <TooltipContent
+          className="text-white bg-slate-800 border-slate-800"
           side={side}
           align={align}
           sideOffset={sideOffset}
           alignOffset={alignOffset}
-          className="text-white bg-slate-800 border-slate-800"
         >
           <p className="font-semibold capitalize">{label}</p>
         </TooltipContent>
@@ -39,5 +39,4 @@ const Hint = ({
     </TooltipProvider>
   );
 };
-
 export default Hint;
