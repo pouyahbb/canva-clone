@@ -11,6 +11,7 @@ import {
   FONT_FAMILY,
   FONT_SIZE,
   FONT_WEIGHT,
+  JSON_KEYS,
   RECTANGLE_OPTIONS,
   STROKE_COLOR,
   STROKE_DASH_ARRAY,
@@ -21,8 +22,14 @@ import {
 import { useCanvasEvents } from "./useCanvasEvents";
 import { createFilter, isTextType } from "../utils";
 import { useClipboard } from "./use-clipboard";
+import { useHistory } from "./use-history";
 
 const buildEditor = ({
+  save,
+  undo,
+  redo,
+  canRedo,
+  canUndo,
   canvas,
   copy,
   autoZoom,
@@ -60,8 +67,31 @@ const buildEditor = ({
   return {
     autoZoom,
     getWorkspace,
+    changeSize: (value: { width: number; height: number }) => {
+      const workspace = getWorkspace();
+
+      workspace?.set(value);
+      autoZoom();
+      save();
+    },
+    changeBackground: (value: string) => {
+      const workspace = getWorkspace();
+      workspace?.set({ fill: value });
+      canvas.renderAll();
+
+      save();
+    },
+    enableDrawingMode: () => {
+      canvas.discardActiveObject();
+      canvas.renderAll();
+      canvas.isDrawingMode = true;
+      canvas.freeDrawingBrush.width = strokeWidth;
+      canvas.freeDrawingBrush.color = strokeColor;
+    },
+    disableDrawingMode: () => {
+      canvas.isDrawingMode = false;
+    },
     zoomIn: () => {
-      console.log("zoom");
       let zoomRatio = canvas.getZoom();
       zoomRatio += 0.05;
       const center = canvas.getCenter();
@@ -79,31 +109,10 @@ const buildEditor = ({
         zoomRatio < 0.2 ? 0.2 : zoomRatio
       );
     },
-    changeSize: (value: { width: number; height: number }) => {
-      const workspace = getWorkspace();
-
-      workspace?.set(value);
-      autoZoom();
-      // save();
-    },
-
-    changeBackground: (value: string) => {
-      const workspace = getWorkspace();
-      workspace?.set({ fill: value });
-      canvas.renderAll();
-
-      // save();
-    },
-    enableDrawingMode: () => {
-      canvas.discardActiveObject();
-      canvas.renderAll();
-      canvas.isDrawingMode = true;
-      canvas.freeDrawingBrush.width = strokeWidth;
-      canvas.freeDrawingBrush.color = strokeColor;
-    },
-    disableDrawingMode: () => {
-      canvas.isDrawingMode = false;
-    },
+    onUndo: () => undo(),
+    onRedo: () => redo(),
+    canRedo,
+    canUndo,
     onCopy: () => copy(),
     onPaste: () => paste(),
     changeOpacity: (value: number) => {
@@ -538,8 +547,13 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
   });
 
   const { copy, paste } = useClipboard({ canvas });
+  const { save, canRedo, canUndo, undo, redo, canvasHistory, setHistoryIndex } =
+    useHistory({
+      canvas,
+      // saveCallback,
+    });
   useCanvasEvents({
-    // save,
+    save,
     canvas,
     setSelectedObjects,
     clearSelectionCallback,
@@ -547,6 +561,11 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
   const editor = useMemo(() => {
     if (canvas) {
       return buildEditor({
+        save,
+        undo,
+        redo,
+        canRedo,
+        canUndo,
         canvas,
         autoZoom,
         fillColor,
@@ -566,6 +585,11 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
     }
     return undefined;
   }, [
+    save,
+    undo,
+    redo,
+    canRedo,
+    canUndo,
     copy,
     paste,
     canvas,
@@ -618,8 +642,15 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
 
       setCanvas(initialCanvas);
       setContainer(initialContainer);
+
+      const currentState = JSON.stringify(initialCanvas.toJSON(JSON_KEYS));
+      canvasHistory.current = [currentState];
+      setHistoryIndex(0);
     },
-    []
+    [
+      canvasHistory, // No need, this is from useRef
+      setHistoryIndex, // No need, this is from useState
+    ]
   );
   return { init, editor };
 };
