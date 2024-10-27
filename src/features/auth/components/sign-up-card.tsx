@@ -19,9 +19,10 @@ import {
   CardContent,
   CardDescription,
 } from "@/components/ui/card";
+import { useSignUp } from "../hooks/use-sign-up";
 
 export const SignUpCard = () => {
-  // const mutation = useSignUp();
+  const mutation = useSignUp();
 
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -31,26 +32,26 @@ export const SignUpCard = () => {
     signIn(provider, { callbackUrl: "/" });
   };
 
-  // const onCredentialSignUp = (e: React.FormEvent<HTMLFormElement>) => {
-  //   e.preventDefault();
+  const onCredentialSignUp = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-  //   mutation.mutate(
-  //     {
-  //       name,
-  //       email,
-  //       password,
-  //     },
-  //     {
-  //       onSuccess: () => {
-  //         signIn("credentials", {
-  //           email,
-  //           password,
-  //           callbackUrl: "/",
-  //         });
-  //       },
-  //     }
-  //   );
-  // };
+    mutation.mutate(
+      {
+        name,
+        email,
+        password,
+      },
+      {
+        onSuccess: () => {
+          signIn("credentials", {
+            email,
+            password,
+            callbackUrl: "/",
+          });
+        },
+      }
+    );
+  };
 
   return (
     <Card className="w-full h-full p-8">
@@ -60,19 +61,16 @@ export const SignUpCard = () => {
           Use your email or another service to continue
         </CardDescription>
       </CardHeader>
-      {/* {!!mutation.error && (
+      {!!mutation.error && (
         <div className="bg-destructive/15 p-3 rounded-md flex items-center gap-x-2 text-sm text-destructive mb-6">
           <TriangleAlert className="size-4" />
           <p>Something went wrong</p>
         </div>
-      )} */}
+      )}
       <CardContent className="space-y-5 px-0 pb-0">
-        <form
-          // onSubmit={onCredentialSignUp}
-          className="space-y-2.5"
-        >
+        <form onSubmit={onCredentialSignUp} className="space-y-2.5">
           <Input
-            // disabled={mutation.isPending}
+            disabled={mutation.isPending}
             value={name}
             onChange={(e) => setName(e.target.value)}
             placeholder="Full name"
@@ -80,7 +78,7 @@ export const SignUpCard = () => {
             required
           />
           <Input
-            // disabled={mutation.isPending}
+            disabled={mutation.isPending}
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Email"
@@ -88,7 +86,7 @@ export const SignUpCard = () => {
             required
           />
           <Input
-            // disabled={mutation.isPending}
+            disabled={mutation.isPending}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Password"
@@ -98,7 +96,7 @@ export const SignUpCard = () => {
             maxLength={20}
           />
           <Button
-            // disabled={mutation.isPending}
+            disabled={mutation.isPending}
             type="submit"
             className="w-full"
             size="lg"
@@ -109,7 +107,7 @@ export const SignUpCard = () => {
         <Separator />
         <div className="flex flex-col gap-y-2.5">
           <Button
-            // disabled={mutation.isPending}
+            disabled={mutation.isPending}
             onClick={() => onProviderSignUp("google")}
             variant="outline"
             size="lg"
@@ -119,7 +117,7 @@ export const SignUpCard = () => {
             Continue with Google
           </Button>
           <Button
-            // disabled={mutation.isPending}
+            disabled={mutation.isPending}
             onClick={() => onProviderSignUp("github")}
             variant="outline"
             size="lg"
