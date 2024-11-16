@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { ArrowRight, Sparkles } from "lucide-react";
 
-import { useCreateProject } from "@/features/projects/use-create-project";
+import { useCreateProject } from "@/features/projects/api/use-create-project";
 
 import { Button } from "@/components/ui/button";
 

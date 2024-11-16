@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { fabric } from "fabric";
 import { useAutoResize } from "@/features/editor/hooks/use-auto-resize";
 import {
@@ -30,6 +30,7 @@ import { useClipboard } from "./use-clipboard";
 import { useHistory } from "./use-history";
 import { useHotkeys } from "./use-hotkeys";
 import { useWindowEvents } from "./use-window-events";
+import { useLoadState } from "./use-load-state";
 
 const buildEditor = ({
   save,
@@ -603,7 +604,17 @@ const buildEditor = ({
   };
 };
 
-const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
+const useEditor = ({
+  defaultState,
+  defaultHeight,
+  defaultWidth,
+  clearSelectionCallback,
+  saveCallback,
+}: EditorHookProps) => {
+  const initialState = useRef(defaultState);
+  const initialWidth = useRef(defaultWidth);
+  const initialHeight = useRef(defaultHeight);
+
   const [canvas, setCanvas] = useState<fabric.Canvas | null>(null);
   const [container, setContainer] = useState<HTMLDivElement | null>(null);
   const [fontFamily, setFontFamily] = useState(FONT_FAMILY);
@@ -623,7 +634,7 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
   const { save, canRedo, canUndo, undo, redo, canvasHistory, setHistoryIndex } =
     useHistory({
       canvas,
-      // saveCallback,
+      saveCallback,
     });
   useCanvasEvents({
     save,
@@ -639,6 +650,14 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
     save,
     canvas,
   });
+  useLoadState({
+    canvas,
+    autoZoom,
+    initialState,
+    canvasHistory,
+    setHistoryIndex,
+  });
+  
   const editor = useMemo(() => {
     if (canvas) {
       return buildEditor({
@@ -702,8 +721,8 @@ const useEditor = ({ clearSelectionCallback }: EditorHookProps) => {
       });
 
       const initialWorkspace = new fabric.Rect({
-        width: 900,
-        height: 1200,
+        width: initialWidth.current,
+        height: initialHeight.current,
         name: "clip",
         fill: "white",
         selectable: false,
